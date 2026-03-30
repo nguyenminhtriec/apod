@@ -16,7 +16,7 @@ import { useState } from "react";
 // import { ChevronRight, ChevronDown } from "lucide-react";
 
 export default function Apod() {
-    const [startDate, setStartDate] = useState('');
+    const [startDate, setStartDate] = useState('2026-01-01');
     const [apod, setApod] = useState<Apod[]>([]);
 
     const getPicture = async () => {
@@ -37,9 +37,10 @@ export default function Apod() {
     }
     return (
       <div>
-        <div className="mx-2">
+        <div className="mx-2 mt-1">
             <input className='bg-gray-500 p-2'
                 type='date'
+                defaultValue={startDate}
                 onChange={e => setStartDate(e.target.value)}
             />
             <button 
@@ -50,7 +51,7 @@ export default function Apod() {
                 Get Pictures
             </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 m-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs text-mauve-400" >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-2 gap-2 text-xs text-mauve-700 dark:text-mauve-400" >
             { apod.map((item: Apod) => (
                 <ApodItem key={item.date} item={item} />
             ))}
@@ -62,7 +63,7 @@ export default function Apod() {
 export function ApodItem({ item }: { item: Apod }) {
     const [desc, setDesc] = useState(false);
     return (
-        <div className="w-auto overflow-hidden mt-2 p-2 border border-gray-700 text-xs text-gray-400">
+        <div className="w-auto overflow-hidden mt-2 p-2 border border-gray-700 text-sm">
             <p className="font-bold">{item.title}</p>
             <p>{item.date}</p>
             {item.media_type==='video'
