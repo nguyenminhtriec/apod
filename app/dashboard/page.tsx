@@ -37,8 +37,8 @@ export default function Apod() {
     }
     return (
       <div>
-        <div className="mx-2 mt-1">
-            <input className='bg-gray-500 p-2'
+        <div className="mx-2 mt-1 text-sm">
+            <input className="bg-gray-400 p-2 rounded-sm border border-gray-500"
                 type='date'
                 defaultValue={startDate}
                 onChange={e => setStartDate(e.target.value)}
@@ -62,13 +62,20 @@ export default function Apod() {
 
 export function ApodItem({ item }: { item: Apod }) {
     const [desc, setDesc] = useState(false);
+    const isVideoMp4 = item.media_type === 'video' && item.url.endsWith('.mp4');
+
     return (
         <div className="w-auto overflow-hidden mt-2 p-2 border border-gray-700 text-sm">
             <p className="font-bold">{item.title}</p>
-            <p>{item.date}</p>
-            {item.media_type==='video'
-                ? <video controls muted src= {item.url} title={item.title} />
-                : <img src={item.url} className="size-auto mt-4" />
+            <p className="mb-2">{item.date}</p>
+            {isVideoMp4
+            ? <video controls className="w-full">
+                <source src={item.url} type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            : item.media_type === 'video'
+                ? <iframe  src= {item.url} title={item.title} />
+                : <img src={item.url} className="size-auto" />
             }
             <div className="my-2">
                 <div className="flex item-start justify-start my-2">
@@ -78,7 +85,7 @@ export function ApodItem({ item }: { item: Apod }) {
                 </div>
                 {desc && item.explanation}
             </div>
-            {item.copyright ? <label>&copy; {item.copyright}</label> : <p id="NASA">Source: NASA OPEN API</p>}
+            {item.copyright ? <label>&copy; {item.copyright}</label> : <p>Source: NASA OPEN API</p>}
         </div>
     )
 }
