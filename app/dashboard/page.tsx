@@ -12,7 +12,7 @@ type Apod = {
     url: string
 }
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { ChevronRight, ChevronDown } from "lucide-react";
 
 export default function Apod() {
@@ -74,7 +74,7 @@ export function ApodItem({ item }: { item: Apod }) {
                 Your browser does not support the video tag.
             </video>
             : item.media_type === 'video'
-                ? <iframe  src= {item.url} title={item.title} />
+                ? <iframe className="w-auto" src= {item.url} title={item.title} allow="encrypted-media; accelerometer;" allowFullScreen />
                 : <img src={item.url} className="size-auto" />
             }
             <div className="my-2">
@@ -83,7 +83,7 @@ export function ApodItem({ item }: { item: Apod }) {
                     <button className="border border-gray-500 rounded-xs px-1" 
                       onClick={() => setDesc(!desc)}>{!desc ? "Open" : "Close"}</button>                            
                 </div>
-                {desc && item.explanation}
+                <div >{desc && item.explanation}</div>
             </div>
             {item.copyright ? <label>&copy; {item.copyright}</label> : <p>Source: NASA OPEN API</p>}
         </div>
