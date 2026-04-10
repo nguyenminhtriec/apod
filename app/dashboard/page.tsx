@@ -12,7 +12,7 @@ type Apod = {
     url: string
 }
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 // import { ChevronRight, ChevronDown } from "lucide-react";
 
 export default function Apod() {
@@ -38,7 +38,7 @@ export default function Apod() {
     return (
       <div>
         <div className="mx-2 mt-1 text-sm">
-            <input className="bg-gray-400 p-2 rounded-sm border border-gray-500"
+            <input className="bg-gray-400 p-2 rounded-sm border border-gray-500 "
                 type='date'
                 defaultValue={startDate}
                 onChange={e => setStartDate(e.target.value)}
@@ -46,14 +46,16 @@ export default function Apod() {
             <button 
                 disabled={!startDate}
                 onClick={getPicture} 
-                className="bg-blue-500 rounded-sm hover:bg-blue-300 ml-4 p-2"
+                className="bg-blue-500 rounded-sm hover:bg-blue-400 ml-4 p-2 cursor-pointer "
             >
                 Get Pictures
             </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-2 gap-2 text-xs text-mauve-700 dark:text-mauve-400" >
             { apod.map((item: Apod) => (
-                <ApodItem key={item.date} item={item} />
+                <Suspense key={item.date} fallback={<div>Loading...</div>} >
+                    <ApodItem item={item} />
+                </Suspense>
             ))}
         </div>
       </div>  
@@ -79,8 +81,8 @@ export function ApodItem({ item }: { item: Apod }) {
             }
             <div className="my-2">
                 <div className="flex item-start justify-start my-2">
-                    <div className="mr-4">Explaination</div>
-                    <button className="border border-gray-500 rounded-xs px-1" 
+                    <div className="mr-4">Explanation</div>
+                    <button className="border border-gray-500 rounded-xs px-1 cursor-pointer" 
                       onClick={() => setDesc(!desc)}>{!desc ? "Open" : "Close"}</button>                            
                 </div>
                 <div >{desc && item.explanation}</div>

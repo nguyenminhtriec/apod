@@ -9,6 +9,9 @@ export async function POST(req: Request) {
     const response = await fetch(url, {cache: "force-cache"});
     const data = await response.json();
 
+    if (!response.ok) {
+        return Response.json({error: "Failed to fetch data from APOD API"}, {status: 500});
+    }
     return Response.json(data);
 }
 
