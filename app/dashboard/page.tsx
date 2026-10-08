@@ -1,25 +1,31 @@
 
 'use client';
 
+import TurndownService from 'turndown';
+import ReactMarkdown from 'react-markdown';
+import React, { Suspense, useState, useEffect } from "react";
+// import { ChevronRight, ChevronDown } from "lucide-react";
+import { getRandomDate } from "@/app/utils/datemanage";
+
+
 type Apod = {
     copyright: string | undefined,
     date: string,
     explanation: string,
     hdurl: string,
     media_type: string,
-    service_version: string,
     title: string,
     url: string
 }
 
-import { Suspense, useState } from "react";
-// import { ChevronRight, ChevronDown } from "lucide-react";
-
 export default function Apod() {
     const [startDate, setStartDate] = useState('2026-01-01');
     const [apod, setApod] = useState<Apod[]>([]);
+    const [loading, setLoading] = useState(false);
 
     const getPicture = async () => {
+        setLoading(true);
+        setApod([]);
         const apodResponse = await fetch('/dashboard/api', {
             method: 'POST',
             headers: {
@@ -28,27 +34,32 @@ export default function Apod() {
             body: JSON.stringify({startDate}),
         })
         if (!apodResponse.ok) {
-            console.error("No response from API");
+            console.log("No response from API");
             return;
         }
         const data = await apodResponse.json();
         console.log("Apod received", data);
         setApod(data);
+        setLoading(false);
     }
+
+    useEffect(() => {
+        getPicture();
+    }, [startDate]);
+
     return (
       <div>
-        <div className="mx-2 mt-1 text-sm">
-            <input className="bg-gray-400 p-2 rounded-sm border border-gray-500 "
-                type='date'
-                defaultValue={startDate}
-                onChange={e => setStartDate(e.target.value)}
-            />
+        <div className="flex items-center mx-2 mt-1 text-sm">
+            <DatePicker isoStringDate={startDate} onChange={(e) => setStartDate(e.target.value)} />
             <button 
-                disabled={!startDate}
-                onClick={getPicture} 
-                className="bg-blue-500 rounded-sm hover:bg-blue-400 ml-4 p-2 cursor-pointer "
+                disabled={loading}
+                onClick={() => {
+                    const randomDate = getRandomDate();
+                    setStartDate(randomDate.split('T')[0]);
+                }} 
+                className="bg-blue-500 rounded-sm h-8 hover:bg-blue-400 ml-4 p-1 cursor-pointer "
             >
-                Get Pictures
+                Random Pictures
             </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-2 gap-2 text-xs text-mauve-700 dark:text-mauve-400" >
@@ -70,24 +81,55 @@ export function ApodItem({ item }: { item: Apod }) {
         <div className="w-auto overflow-hidden mt-2 p-2 border border-gray-700 text-sm">
             <p className="font-bold">{item.title}</p>
             <p className="mb-2">{item.date}</p>
-            {isVideoMp4
-            ? <video controls className="w-full">
-                <source src={item.url} type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-            : item.media_type === 'video'
-                ? <iframe className="w-auto" src= {item.url} title={item.title} allow="encrypted-media; accelerometer;" allowFullScreen />
-                : <img src={item.url} className="size-auto" />
-            }
+            <img src={item.hdurl} className="w-full" />
             <div className="my-2">
                 <div className="flex item-start justify-start my-2">
                     <div className="mr-4">Explanation</div>
                     <button className="border border-gray-500 rounded-xs px-1 cursor-pointer" 
                       onClick={() => setDesc(!desc)}>{!desc ? "Open" : "Close"}</button>                            
                 </div>
-                <div >{desc && item.explanation}</div>
+                <div >{desc && <ReactMarkdown>{convertToMarkdown(item.explanation)}</ReactMarkdown>}</div>
             </div>
-            {item.copyright ? <label>&copy; {item.copyright}</label> : <p>Source: NASA OPEN API</p>}
+            {item.copyright && <div>&copy;{<ReactMarkdown>{convertToMarkdown(item.copyright)}</ReactMarkdown>} </div> }
         </div>
     )
 }
+
+function ApodMedia({ item }: { item: Apod }) {
+    return (
+        <div>
+            {item.media_type === 'image'
+            ? <img src={item.hdurl} className="size-auto" />
+            : item.media_type === 'video' 
+                ? <video controls className="w-full">
+                <source src={item.url} type="video/mp4" />
+                Your browser does not support the video tag.
+                </video>
+                : <iframe className="w-auto" 
+                src= {item.url} title={item.title} allow="encrypted-media; accelerometer;" allowFullScreen />               
+            }
+        </div>
+    )
+}
+
+export function DatePicker({isoStringDate, onChange}: {isoStringDate: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}) {    
+    return (
+        <div className="flex items-center justify-start my-2">        
+            <input 
+                type="date"
+                value={isoStringDate}
+                min='1995-06-16'
+                max={new Date(Date.now()).toISOString().split('T')[0]}
+                onChange={onChange}
+                className="bg-gray-400 p-2 rounded-sm border border-gray-500"
+            />
+        </div>
+    )
+}
+
+function convertToMarkdown(html: string): string {
+    const turndownService = new TurndownService();
+    const markdown = turndownService.turndown(html);
+    return markdown;
+}
+

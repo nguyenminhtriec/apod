@@ -14,7 +14,7 @@ export default function Home() {
             height={64}
             className="mt-8 rounded-lg shadow-lg"
           />
-          <a href="/dashboard" className="mt-8 px-6 py-3 bg-blue-700 rounded-lg hover:bg-blue-600 transition">
+          <a href="/dashboard" className="mt-8 px-6 py-3 bg-blue-700/40 rounded-lg hover:bg-blue-600 transition">
             Go
           </a>
         </div>
